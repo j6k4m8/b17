@@ -2,7 +2,8 @@ import skimage.io as io
 import skimage.transform as sk_transform
 
 B17_CONST = {
-    "INVALID_IMAGE":          "Empty image."
+    "INVALID_IMAGE":          "Empty image.",
+    "UNSUPPORTED":            "Unsupported feature requested."
 }
 
 NORTH = 8
