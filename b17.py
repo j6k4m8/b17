@@ -36,4 +36,42 @@ class NeuroImage(io.Image):
                 tuple([(proportion * i) for i in self.image.shape])
             ))
 
-    def match_edge()
+    def match_edge(self, direction):
+        """
+        Attempts to match two images along the edge specified.
+        Edge refers to the edge of the subject. So,
+
+             >>> n.match_edge(m, EAST)
+
+                 ------- -------
+                |       |       |
+                |   n   |   m   |
+                |       |       |
+                 ------- -------
+
+        There's a somewhat complex process to do this in order to make
+        sure we're not wasting time:
+
+        1   Lower the resolution of both images. Now, overlay the images
+            with full overlap (i.e. diagram above).
+        2   Subtract the first from the second, and establish a net
+            difference along the overlap.
+        3   Move the second image down by one voxel.
+        4   Minimize the difference of the two pictures.
+                        -------
+                       |       |
+                       |   m   |
+                 ------|       |
+                |       -------
+                |   n   |  ^
+                |       |  v
+                 -------
+        5   The global minimum of this procedure is the 'match'.
+        6   Increase the resolution, and resume this process, now only
+            moving the distance of 1.5 voxels from optimal low-res position.
+
+        In very high-resolution images, this process can be recursed with
+        even lower resolution, so that the starting voxel is 25-percent the
+        size of the initial image, the second round is 50, and finally 100.
+         """
+
