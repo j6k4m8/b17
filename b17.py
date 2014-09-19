@@ -22,7 +22,7 @@ class NeuroImage(io.Image):
     def __init__(self, image):
         self.image = image
         if self.image == []:
-            raise B17Exception(B17_CONST.INVALID_IMAGE)
+            raise B17Exception(B17_CONST["INVALID_IMAGE"])
 
     def find_blobs(self):
         """
@@ -74,5 +74,12 @@ class NeuroImage(io.Image):
         In very high-resolution images, this process can be recursed with
         even lower resolution, so that the starting voxel is 25-percent the
         size of the initial image, the second round is 50, and finally 100.
-         """
+        """
+
+        if direction == EAST:
+            return match_east_edge(that)
+        else:
+            raise B17Exception(B17_CONST["UNSUPPORTED"])
+
+
 
