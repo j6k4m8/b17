@@ -2,8 +2,9 @@ import skimage.io as io
 import skimage.transform as sk_transform
 
 B17_CONST = {
-    "INVALID_IMAGE":          "Invalid image."
+    "INVALID_IMAGE":          "Empty image."
 }
+
 
 class B17Exception(Exception):
     pass
@@ -17,20 +18,15 @@ class NeuroImage(io.Image):
         if self.image == []:
             raise B17Exception(B17_CONST.INVALID_IMAGE)
 
-
     def find_blobs(self):
         """
         Convert the image to grayscale, and then threshold the
         found blob-size (from skimage.blob_...). Return a blob[].
         """
 
-
     def re_res(self, proportion):
         return NeuroImage(
             sk_transform.resize(
                 self.image,
-                (
-                    int(proportion * self.image.shape[0]),
-                    int(proportion * self.image.shape[1])
-                )
+                tuple([(proportion * i) for i in self.image.shape])
             ))
