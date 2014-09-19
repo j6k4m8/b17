@@ -5,6 +5,11 @@ B17_CONST = {
     "INVALID_IMAGE":          "Empty image."
 }
 
+NORTH = 8
+SOUTH = 2
+EAST  = 6
+WEST  = 4
+
 
 class B17Exception(Exception):
     pass
@@ -30,3 +35,5 @@ class NeuroImage(io.Image):
                 self.image,
                 tuple([(proportion * i) for i in self.image.shape])
             ))
+
+    def match_edge()
