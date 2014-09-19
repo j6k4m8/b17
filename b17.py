@@ -37,7 +37,7 @@ class NeuroImage(io.Image):
                 tuple([(proportion * i) for i in self.image.shape])
             ))
 
-    def match_edge(self, direction):
+    def match_edge(self, that, direction):
         """
         Attempts to match two images along the edge specified.
         Edge refers to the edge of the subject. So,
