@@ -66,6 +66,64 @@ class NeuroImage(io.Image):
             ransac((src, dst), ProjectiveTransform,
                    min_samples=4, residual_threshold=2)​​
 
+        r, c = that.shape[:2]
+
+        # Note that transformations take coordinates in
+        # (x, y) format, not (row, column), in order to be
+        # consistent with most literature.
+        corners = np.array([[0, 0],
+                            [0, r],
+                            [c, 0],
+                            [c, r]])
+
+        # Warp the image corners to their new positions.
+        warped_corners = model_robust(corners)
+
+        # Find the extents of both the reference image and
+        # the warped target image.
+        all_corners = np.vstack((warped_corners, corners))
+
+        corner_min = np.min(all_corners, axis=0)
+        corner_max = np.max(all_corners, axis=0)
+
+        output_shape = (corner_max - corner_min)
+        output_shape = np.ceil(output_shape[::-1])​​
+
+        from skimage.color import gray2rgb
+        from skimage.exposure import rescale_intensity
+        from skimage.transform import warp
+        from skimage.transform import SimilarityTransform
+
+        offset = SimilarityTransform(translation=-corner_min)
+
+        this_ = warp(this, offset.inverse,
+                       output_shape=output_shape, cval=-1)
+
+        that_ = warp(that, (model_robust + offset).inverse,
+                       output_shape=output_shape, cval=-1)​​
+
+        def add_alpha(image, background=-1):
+            """Add an alpha layer to the image.
+
+            The alpha layer is set to 1 for foreground
+            and 0 for background.
+            """
+            rgb = gray2rgb(image)
+            alpha = (image != background)
+            return np.dstack((rgb, alpha))
+
+        this_alpha = add_alpha(this_)
+        that_alpha = add_alpha(that_)
+
+        merged = (this_alpha + that_alpha)
+        alpha = merged[..., 3]
+
+        # The summed alpha layers give us an indication of
+        # how many images were combined to make up each
+        # pixel.  Divide by the number of images to get
+        # an average.
+        merged /= np.maximum(alpha, 1)[..., np.newaxis]​​
+
 
 
 
