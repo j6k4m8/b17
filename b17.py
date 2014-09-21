@@ -59,6 +59,13 @@ class NeuroImage(io.Image):
                                       descriptors2,
                                       cross_check=True)​​
 
+        src = keypoints2[matches12[:, 1]][:, ::-1]
+        dst = keypoints1[matches12[:, 0]][:, ::-1]
+
+        model_robust, inliers = \
+            ransac((src, dst), ProjectiveTransform,
+                   min_samples=4, residual_threshold=2)​​
+
 
 
 
