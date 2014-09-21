@@ -1,19 +1,20 @@
 import skimage.io as io
-import skimage.transform as sk_transform
+from skimage import transform
+from skimage.color import rgb2gray
+from skimage.feature import ORB, match_descriptors
 
 B17_CONST = {
     "INVALID_IMAGE":          "Empty image.",
     "UNSUPPORTED":            "Unsupported feature requested."
 }
 
-NORTH = 8
-SOUTH = 2
-EAST  = 6
-WEST  = 4
-
-
 class B17Exception(Exception):
     pass
+
+class NeuroCanvas:
+
+    def __init__(self):
+        self.canvas = []
 
 
 class NeuroImage(io.Image):
@@ -32,10 +33,20 @@ class NeuroImage(io.Image):
 
     def re_res(self, proportion):
         return NeuroImage(
-            sk_transform.resize(
-                self.image,
-                tuple([(proportion * i) for i in self.image.shape])
-            ))
+            transform.rescale(self.image, proportion))
+
+
+
+    def add_from_image_using_features(self, that):
+        this = rgb2gray(self.image[:, 500:500+1987, :])
+        that = rgb2gray(that[:, 500:500+1987, :])
+
+        this = transform.rescale(this, 0.25)
+        that = transform.rescale(that, 0.25)​​
+
+
+
+
 
     def match_edge(self, that, direction):
         """
@@ -82,4 +93,9 @@ class NeuroImage(io.Image):
             raise B17Exception(B17_CONST["UNSUPPORTED"])
 
 
+    def match_east_edge(self, that):
+        """
+        Matches the east edge of `this` with the west edge of `that`.
+        """
+        overlap = [0, 0]
 
