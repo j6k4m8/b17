@@ -2,6 +2,7 @@ import skimage.io as io
 from skimage import transform
 from skimage.color import rgb2gray
 from skimage.feature import ORB, match_descriptors
+from skimage.measure import ransac
 
 B17_CONST = {
     "INVALID_IMAGE":          "Empty image.",
@@ -43,6 +44,20 @@ class NeuroImage(io.Image):
 
         this = transform.rescale(this, 0.25)
         that = transform.rescale(that, 0.25)​​
+
+        orb = ORB(n_keypoints=1000, fast_threshold=0.05)
+
+        orb.detect_and_extract(this)
+        keypoints1 = orb.keypoints
+        descriptors1 = orb.descriptors
+
+        orb.detect_and_extract(that)
+        keypoints2 = orb.keypoints
+        descriptors2 = orb.descriptors
+
+        matches12 = match_descriptors(descriptors1,
+                                      descriptors2,
+                                      cross_check=True)​​
 
 
 
