@@ -3,6 +3,7 @@ from skimage import transform
 from skimage.color import rgb2gray
 from skimage.feature import ORB, match_descriptors
 from skimage.measure import ransac
+import numpy as np
 
 B17_CONST = {
     "INVALID_IMAGE":          "Empty image.",
@@ -43,9 +44,9 @@ class NeuroImage(io.Image):
         that = rgb2gray(that[:, 500:500+1987, :])
 
         this = transform.rescale(this, 0.25)
-        that = transform.rescale(that, 0.25)​​
+        that = transform.rescale(that, 0.25)
 
-        orb = ORB(n_keypoints=1000, fast_threshold=0.05)
+        orb = ORB(n_keypoints=10000, fast_threshold=0.05)
 
         orb.detect_and_extract(this)
         keypoints1 = orb.keypoints
@@ -56,15 +57,15 @@ class NeuroImage(io.Image):
         descriptors2 = orb.descriptors
 
         matches12 = match_descriptors(descriptors1,
-                                      descriptors2,
-                                      cross_check=True)​​
+                                    descriptors2,
+                                    cross_check = True)
 
         src = keypoints2[matches12[:, 1]][:, ::-1]
         dst = keypoints1[matches12[:, 0]][:, ::-1]
 
         model_robust, inliers = \
-            ransac((src, dst), ProjectiveTransform,
-                   min_samples=4, residual_threshold=2)​​
+            ransac((src, dst), transform.ProjectiveTransform,
+                    min_samples=4, residual_threshold=2)
 
         r, c = that.shape[:2]
 
@@ -87,7 +88,7 @@ class NeuroImage(io.Image):
         corner_max = np.max(all_corners, axis=0)
 
         output_shape = (corner_max - corner_min)
-        output_shape = np.ceil(output_shape[::-1])​​
+        output_shape = np.ceil(output_shape[::-1])
 
         from skimage.color import gray2rgb
         from skimage.exposure import rescale_intensity
@@ -100,7 +101,7 @@ class NeuroImage(io.Image):
                        output_shape=output_shape, cval=-1)
 
         that_ = warp(that, (model_robust + offset).inverse,
-                       output_shape=output_shape, cval=-1)​​
+                        output_shape = output_shape, cval = -1)
 
         def add_alpha(image, background=-1):
             """Add an alpha layer to the image.
@@ -122,7 +123,10 @@ class NeuroImage(io.Image):
         # how many images were combined to make up each
         # pixel.  Divide by the number of images to get
         # an average.
-        merged /= np.maximum(alpha, 1)[..., np.newaxis]​​
+        merged /= np.maximum(alpha, 1)[..., np.newaxis]
+        io.imshow(merged)
+        io.show()
+        return merged
 
 
 
