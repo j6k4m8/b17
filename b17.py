@@ -46,7 +46,7 @@ class NeuroImage(io.Image):
         this = transform.rescale(this, 0.25)
         that = transform.rescale(that, 0.25)
 
-        orb = ORB(n_keypoints=10000, fast_threshold=0.05)
+        orb = ORB(n_keypoints=1000, fast_threshold=0.05)
 
         orb.detect_and_extract(this)
         keypoints1 = orb.keypoints
@@ -126,7 +126,8 @@ class NeuroImage(io.Image):
         merged /= np.maximum(alpha, 1)[..., np.newaxis]
         io.imshow(merged)
         io.show()
-        return merged
+        self.offset = offset
+        return NeuroImage(merged)
 
 
 
