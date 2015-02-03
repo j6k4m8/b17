@@ -6,18 +6,13 @@ from skimage.feature import ORB, match_descriptors
 from skimage.measure import ransac
 import numpy as np
 
-B17_CONST = {
+B17_ERRORS = {
     "INVALID_IMAGE":          "Empty image.",
     "UNSUPPORTED":            "Unsupported feature requested."
 }
 
 class B17Exception(Exception):
     pass
-
-class NeuroCanvas:
-
-    def __init__(self):
-        self.canvas = []
 
 
 class NeuroImage(io.Image):
@@ -26,7 +21,7 @@ class NeuroImage(io.Image):
     def __init__(self, image):
         self.image = image
         if self.image == []:
-            raise B17Exception(B17_CONST["INVALID_IMAGE"])
+            raise B17Exception(B17_ERRORS["INVALID_IMAGE"])
 
     def find_blobs(self):
         """
@@ -56,8 +51,8 @@ class NeuroImage(io.Image):
         this = self.to_bw()
         that = that.to_bw()
 
-        # # this = this.blur()
-        # # that = that.blur()
+        this = this.blur()
+        that = that.blur()
 
         this = self.to_grayscale()
         that = that.to_grayscale()
@@ -67,7 +62,6 @@ class NeuroImage(io.Image):
 
         orb = ORB(n_keypoints=2000, fast_threshold=0.5)
 
-        print 'here'
         orb.detect_and_extract(this)
         keypoints1 = orb.keypoints
         descriptors1 = orb.descriptors
@@ -195,7 +189,7 @@ class NeuroImage(io.Image):
         if direction == EAST:
             return match_east_edge(that)
         else:
-            raise B17Exception(B17_CONST["UNSUPPORTED"])
+            raise B17Exception(B17_ERRORS["UNSUPPORTED"])
 
 
     def match_east_edge(self, that):
