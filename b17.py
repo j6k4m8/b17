@@ -57,8 +57,8 @@ class NeuroImage(io.Image):
         this = self.to_grayscale()
         that = that.to_grayscale()
 
-        this = transform.rescale(this, 0.5)
-        that = transform.rescale(that, 0.5)
+        this = transform.re_res(this, 0.5)
+        that = transform.re_res(that, 0.5)
 
         orb = ORB(n_keypoints=2000, fast_threshold=0.5)
 
