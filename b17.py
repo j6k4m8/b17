@@ -1,6 +1,7 @@
 import skimage.io as io
 from skimage import transform
 from skimage.color import rgb2gray
+from skimage.filter import *
 from skimage.feature import ORB, match_descriptors
 from skimage.measure import ransac
 import numpy as np
@@ -37,17 +38,36 @@ class NeuroImage(io.Image):
         return NeuroImage(
             transform.rescale(self.image, proportion))
 
+    def to_grayscale(self):
+        return NeuroImage(
+            rgb2gray(self.image))
+
+    def to_bw(self):
+        return NeuroImage(
+            threshold_adaptive(self.image, 13, 'mean', offset=5))
+
+    def blur(self):
+        return NeuroImage(
+            gaussian_filter(self.image[:, 500:500+1987, :], sigma=0.5))
 
 
     def add_from_image_using_features(self, that):
-        this = rgb2gray(self.image[:, 500:500+1987, :])
-        that = rgb2gray(that[:, 500:500+1987, :])
 
-        this = transform.rescale(this, 0.25)
-        that = transform.rescale(that, 0.25)
+        this = self.to_bw()
+        that = that.to_bw()
 
-        orb = ORB(n_keypoints=1000, fast_threshold=0.05)
+        # # this = this.blur()
+        # # that = that.blur()
 
+        this = self.to_grayscale()
+        that = that.to_grayscale()
+
+        this = transform.rescale(this, 0.5)
+        that = transform.rescale(that, 0.5)
+
+        orb = ORB(n_keypoints=2000, fast_threshold=0.5)
+
+        print 'here'
         orb.detect_and_extract(this)
         keypoints1 = orb.keypoints
         descriptors1 = orb.descriptors
@@ -124,8 +144,8 @@ class NeuroImage(io.Image):
         # pixel.  Divide by the number of images to get
         # an average.
         merged /= np.maximum(alpha, 1)[..., np.newaxis]
-        io.imshow(merged)
-        io.show()
+        # io.imshow(merged)
+        # io.show()
         self.offset = offset
         return NeuroImage(merged)
 
