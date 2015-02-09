@@ -23,12 +23,6 @@ class NeuroImage(io.Image):
         if self.image == []:
             raise B17Exception(B17_ERRORS["INVALID_IMAGE"])
 
-    def find_blobs(self):
-        """
-        Convert the image to grayscale, and then threshold the
-        found blob-size (from skimage.blob_...). Return a blob[].
-        """
-
     def re_res(self, proportion):
         return NeuroImage(
             transform.rescale(self.image, proportion))
@@ -36,14 +30,17 @@ class NeuroImage(io.Image):
     def to_grayscale(self):
         return NeuroImage(
             rgb2gray(self.image))
+    def to_greyscale(self):
+        return NeuroImage(
+            rgb2gray(self.image))
 
     def to_bw(self):
         return NeuroImage(
-            threshold_adaptive(self.image, 13, 'mean', offset=5))
+            threshold_adaptive(self.image, 23, 'mean', offset=5))
 
     def blur(self):
         return NeuroImage(
-            gaussian_filter(self.image[:, 500:500+1987, :], sigma=0.5))
+            gaussian_filter(self.image, sigma=0.2))
 
 
     def add_from_image_using_features(self, that):
@@ -51,16 +48,13 @@ class NeuroImage(io.Image):
         this = self.to_bw()
         that = that.to_bw()
 
-        this = this.blur()
-        that = that.blur()
-
-        this = self.to_grayscale()
+        this = this.to_grayscale()
         that = that.to_grayscale()
 
-        this = transform.re_res(this, 0.5)
-        that = transform.re_res(that, 0.5)
+        this = this.re_res(0.5)
+        that = this.re_res(0.5)
 
-        orb = ORB(n_keypoints=2000, fast_threshold=0.5)
+        orb = ORB(n_keypoints=2000, fast_threshold=0.3)
 
         orb.detect_and_extract(this)
         keypoints1 = orb.keypoints
@@ -79,7 +73,7 @@ class NeuroImage(io.Image):
 
         model_robust, inliers = \
             ransac((src, dst), transform.ProjectiveTransform,
-                    min_samples=4, residual_threshold=2)
+                    min_samples=200, residual_threshold=2)
 
         r, c = that.shape[:2]
 
